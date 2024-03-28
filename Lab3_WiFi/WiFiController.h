@@ -1,0 +1,39 @@
+#ifndef LawrenceLib_WiFiController_H
+#define LawrenceLib_WiFiController_H
+
+// 連接實際 WIFI 的帳號密碼
+// 本版本寫死帳號密碼很爛，但目的是為了當作試驗範例，後續會希望改成外部輸入版本
+#define WIFI_SSID "LAJ-Home"
+#define WIFI_PASSWORD "你的 WiFi 密碼"
+ 
+// GreenPin 網路連線成功的 LED Pin（預設為 -1，表示不使用 LED 顯示）
+// RedPin 網路連線失敗的 LED Pin（預設為 -1，表示不使用 LED 顯示）
+#define WIFI_GPIO_GREEN_LED 17
+#define WIFI_GPIO_RED_LED  16
+
+#include <Arduino.h> 
+#include <WiFi.h>
+#endif
+  
+class WiFiController 
+{
+  public:
+    /** 建構子 */
+    WiFiController(); 
+
+    /**
+    * 連接 WiFi
+    * @param ssid WiFi 網路名稱
+    * @param password WiFi 密碼
+    */
+    void connectToWiFi(const char* ssid, const char* password);
+  
+    /** 關閉 WiFi 連線 */
+    void closeWiFi();
+
+  private:
+    /** 設定 LED 燈號狀態 */ 
+    void setWiFiLEDStatus(bool greenOn);
+};
+ 
+extern WiFiController WIFI;

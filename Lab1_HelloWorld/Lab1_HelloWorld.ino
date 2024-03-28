@@ -1,9 +1,9 @@
 #include "HelloWorld.h" 
 
-void setup() {
+void setup() 
+{
   // put your setup code here, to run once:
-  Serial.begin(9600);  
-  Serial.println("");
+  Serial.begin(115200);   
 
   // 方法一，直接使用全域 Hello 物件，會顯示預設名稱 Lawrence
   Hello.sayHello();
@@ -16,6 +16,7 @@ void setup() {
   Hello.sayHello("Lawrence Shen");
 }
 
-void loop() {
+void loop() 
+{
   // put your main code here, to run repeatedly:
 }
