@@ -4,7 +4,6 @@
 #define LawrenceLib_HelloWorld_H
  
 #include <Arduino.h> // 包含 Arduino 的頭文件，這是為了使用 Arduino 平台的庫函式
-#endif
 
 // 這是一個類別的定義，名為 HelloWorld
 class HelloWorld 
@@ -28,3 +27,4 @@ class HelloWorld
 // 這樣可以在其他文件中使用這個實例，就是類似底層 Serial.println 的用法
 extern HelloWorld Hello;
 
+#endif

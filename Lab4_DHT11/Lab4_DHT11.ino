@@ -11,10 +11,10 @@ void loop()
 { 
   vTaskDelay(2000 / portTICK_PERIOD_MS); // 暫停 2 秒
  
-  TempHum.readData(myCallback);
+  TempHum.readData(tempHumCallback);
 }
 
-void myCallback(float humidity, float temperature) 
+void tempHumCallback(float humidity, float temperature) 
 {
   Serial.print("Humidity: ");
   Serial.print(humidity);

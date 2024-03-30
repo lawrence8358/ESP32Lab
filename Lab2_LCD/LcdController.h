@@ -3,7 +3,6 @@
  
 #include <Arduino.h> 
 #include <LiquidCrystal_I2C.h>
-#endif
   
 class LcdController 
 {
@@ -30,3 +29,5 @@ class LcdController
 };
  
 extern LcdController LCD;
+
+#endif
