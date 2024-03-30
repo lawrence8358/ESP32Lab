@@ -18,7 +18,7 @@ void OlcdController::print(String firstLine, String secondLine)
   if (!OLEDStatus) return;
   
   display.clearDisplay();
-  display.setTextSize(1);
+  display.setTextSize(2);
   display.setTextColor(SSD1306_WHITE);
 
   display.setCursor(0, 16);
@@ -26,6 +26,27 @@ void OlcdController::print(String firstLine, String secondLine)
 
   display.setCursor(0, 40);
   display.print(secondLine);
+
+  display.display();
+}
+
+void OlcdController::print(String firstLine, String secondLine, String thirdLine) 
+{
+  if (!OLEDStatus) return;
+  
+  display.clearDisplay();
+  display.setTextColor(SSD1306_WHITE);
+
+  display.setTextSize(2);
+  display.setCursor(0, 5);
+  display.println(firstLine);
+
+  display.setTextSize(1);
+  display.setCursor(0, 30);
+  display.print(secondLine);
+
+  display.setCursor(0, 45);
+  display.print(thirdLine);
 
   display.display();
 }

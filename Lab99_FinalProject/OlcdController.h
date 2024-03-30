@@ -24,6 +24,14 @@ class OlcdController
     */
     void print(String firstLine, String secondLine);
 
+    /**
+    * 顯示兩行文字
+    * @param firstLine 第一行文字
+    * @param secondLine 第二行文字
+    * @param thirdLine 第三行文字
+    */
+    void print(String firstLine, String secondLine, String thirdLine);
+
     /** 清除 OLCD */
     void clear();
 

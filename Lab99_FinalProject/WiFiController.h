@@ -28,10 +28,16 @@ class WiFiController
     
     /** 檢查 WiFi 連線狀態 */
     bool connected();
+     
+    void reconnect();
 
   private:
+    unsigned long _previousMillis = 0;
+    unsigned long _interval = 5000;
+    
     /** 設定 LED 燈號狀態 */ 
-    void setWiFiLEDStatus(bool greenOn);
+    void _setLEDStatus();
+    void _printStatus();
 };
  
 extern WiFiController WIFI;

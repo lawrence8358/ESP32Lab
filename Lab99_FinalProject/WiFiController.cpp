@@ -11,7 +11,7 @@ WiFiController::WiFiController()
   if (WIFI_GPIO_RED_LED != -1)  
     pinMode(WIFI_GPIO_RED_LED, OUTPUT); 
     
-  setWiFiLEDStatus(false);
+  _setLEDStatus(); 
 }
 
 // 連接 WiFi
@@ -29,64 +29,24 @@ void WiFiController::connect()
 
   WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
 
-  // 會嘗試大約 10 秒 (20x 500ms)
-  int tryDelay = 500;
-  int numberOfTries = 20; 
+  // 每次等待 1000ms
+  int tryDelay = 1000; 
 
   // 等待 WiFi 連線狀態
   while (true) 
   {
-      switch(WiFi.status()) 
-      {
-          case WL_NO_SSID_AVAIL:
-              Serial.println("[WiFi] 未找到 SSID");
-              setWiFiLEDStatus(false);
-              break;
-          case WL_CONNECT_FAILED:
-              Serial.println("[WiFi] 失敗 - 未連線至 WiFi！");
-              setWiFiLEDStatus(false);
-              return;
-              break;
-          case WL_CONNECTION_LOST:
-              Serial.println("[WiFi] 連線已中斷");
-              setWiFiLEDStatus(false);
-              break;
-          case WL_SCAN_COMPLETED:
-              Serial.println("[WiFi] 掃描已完成");
-              setWiFiLEDStatus(false);
-              break;
-          case WL_DISCONNECTED:
-              Serial.println("[WiFi] WiFi 連線已中斷");
-              setWiFiLEDStatus(false);
-              break;
-          case WL_CONNECTED:
-              Serial.println("[WiFi] WiFi 連線成功！");
-              Serial.print("[WiFi] IP 位址：");
-              Serial.println(WiFi.localIP());
-              Serial.print("[WiFi] 信號強度：");
-              Serial.println(WiFi.RSSI());
-              setWiFiLEDStatus(true);
-              return;
-          default:
-              Serial.print("[WiFi] WiFi 連線狀態：");
-              Serial.println(WiFi.status());
-              setWiFiLEDStatus(true);
-              break;
-      }
-      delay(tryDelay);
-      
-      if(numberOfTries <= 0)
-      {
-          Serial.print("[WiFi] 連線至 WiFi 失敗！");
-          // 使用斷開連線功能強制停止連線嘗試
-          WiFi.disconnect();
-          setWiFiLEDStatus(false);
-          return;
-      } 
-      else 
-      {
-          numberOfTries--;
-      }
+    _printStatus();
+
+    switch(WiFi.status()) 
+    { 
+      case WL_CONNECTED:
+      case WL_CONNECT_FAILED: 
+        return;  
+      default: 
+        break;
+    } 
+
+    delay(tryDelay); 
   }
 }
 
@@ -98,22 +58,82 @@ void WiFiController::close()
 
   Serial.println("[WiFi] 已與 WiFi 斷開連線！");
  
-  setWiFiLEDStatus(false);
+  _setLEDStatus();
 }
 
 // 檢查 WiFi 連線狀態
 bool WiFiController::connected()
 {
-  return WiFi.status() == WL_CONNECTED ? true : false;
-}
-
-void WiFiController::setWiFiLEDStatus(bool greenOn)
-{
+  bool isConnected = WiFi.status() == WL_CONNECTED ? true : false;
+  
   if(WIFI_GPIO_GREEN_LED != -1)  
-    digitalWrite(WIFI_GPIO_GREEN_LED, greenOn ? HIGH : LOW); 
+    digitalWrite(WIFI_GPIO_GREEN_LED, isConnected ? HIGH : LOW); 
 
   if(WIFI_GPIO_RED_LED != -1)  
-    digitalWrite(WIFI_GPIO_RED_LED, !greenOn ? HIGH : LOW);  
+    digitalWrite(WIFI_GPIO_RED_LED, !isConnected ? HIGH : LOW);  
+
+  return isConnected;
+}
+
+void WiFiController::reconnect()
+{ 
+  unsigned long currentMillis = millis();
+
+  if ((WiFi.status() != WL_CONNECTED) && (currentMillis - _previousMillis >= _interval)) 
+  { 
+    Serial.println("Reconnecting to WiFi...");
+
+    WiFi.disconnect();
+    WiFi.reconnect();
+    
+    delay(_interval); 
+    _printStatus(); 
+
+    _previousMillis = currentMillis;
+  }
+}
+
+void WiFiController::_setLEDStatus()
+{
+  connected();
+}
+
+void WiFiController::_printStatus()
+{
+  switch(WiFi.status()) 
+  {
+    case WL_IDLE_STATUS: 
+      Serial.println("[WiFi] 嘗試連接中"); 
+      break;
+    case WL_NO_SSID_AVAIL:
+      Serial.println("[WiFi] 未找到 SSID"); 
+      break;
+    case WL_CONNECT_FAILED:
+      Serial.println("[WiFi] 失敗 - 未連線至 WiFi！");  
+      break;
+    case WL_CONNECTION_LOST:
+      Serial.println("[WiFi] 連線已中斷"); 
+      break;
+    case WL_SCAN_COMPLETED:
+      Serial.println("[WiFi] 掃描已完成"); 
+      break;
+    case WL_DISCONNECTED:
+      Serial.println("[WiFi] WiFi 連線已中斷"); 
+      break;
+    case WL_CONNECTED:
+      Serial.println("[WiFi] WiFi 連線成功！");
+      Serial.print("[WiFi] IP 位址：");
+      Serial.println(WiFi.localIP());
+      Serial.print("[WiFi] 信號強度：");
+      Serial.println(WiFi.RSSI()); 
+      break;
+    default:
+      Serial.print("[WiFi] WiFi 連線狀態：");
+      Serial.println(WiFi.status()); 
+      break;
+  }
+
+  _setLEDStatus();
 }
 
 WiFiController WIFI;

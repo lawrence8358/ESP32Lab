@@ -4,6 +4,7 @@
 #include "OlcdController.h"  
  
 int GIPO_0_BTN = 0;
+bool trunOff = false;
 
 void setup() 
 {
@@ -24,25 +25,27 @@ void loop()
 { 
   vTaskDelay(2000 / portTICK_PERIOD_MS); 
   
+  if(trunOff == true) return;
+
   if (digitalRead(GIPO_0_BTN) == LOW) 
   { 
+    trunOff = true;
     MQTT.close();
     WIFI.close(); 
   }
- 
+  
   TempHum.readData(tempHumCallback);
 
+  WIFI.reconnect();
+
   if(WIFI.connected()) MQTT.connect();  
+
   MQTT.loop();  
 }
 
 void mqttReciveCallback(String topic, String message) 
 {
-  // 分割 Temperature 和 Humidity 子字串
-  String tempstr = "Temp: " + message.substring(13, 18) + " C";
-  String humidstr = "Humid: " + message.substring(29, 34) + " %";
-
-  OLCD.print(tempstr, humidstr);  
+  displayOLCD(message, true);
 }
 
 void tempHumCallback(float humidity, float temperature) 
@@ -52,5 +55,18 @@ void tempHumCallback(float humidity, float temperature)
   String humidityString = String(humidity, 2);
   value = "Temperature: " + temperatureString + " Humidity: " + humidityString;
  
-  MQTT.publish(value.c_str());  
+  if(!WIFI.connected()) 
+    displayOLCD(value.c_str(), false);
+  else 
+    MQTT.publish(value.c_str());  
+}
+
+void displayOLCD(String message, bool isOnline) 
+{
+  // 分割 Temperature 和 Humidity 子字串
+  String tempstr = "Temp: " + message.substring(13, 18) + " C";
+  String humidstr = "Humid: " + message.substring(29, 34) + " %";
+  String status = isOnline ? "Online" : "Offline";
+
+  OLCD.print(status, tempstr, humidstr);  
 }
