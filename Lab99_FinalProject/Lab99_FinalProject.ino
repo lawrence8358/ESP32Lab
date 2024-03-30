@@ -25,6 +25,8 @@ void loop()
 { 
   vTaskDelay(2000 / portTICK_PERIOD_MS); 
   
+  TempHum.readData(tempHumCallback);
+
   if(trunOff == true) return;
 
   if (digitalRead(GIPO_0_BTN) == LOW) 
@@ -33,8 +35,6 @@ void loop()
     MQTT.close();
     WIFI.close(); 
   }
-  
-  TempHum.readData(tempHumCallback);
 
   WIFI.reconnect();
 
