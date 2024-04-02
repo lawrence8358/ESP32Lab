@@ -44,6 +44,7 @@
 ### Lab6_MQTT，結合 Wifi + MQTT 發送訊息
 > * 使用前須先安裝 `PubSubClient library`，可使用 packages 內的 pubsubclient-master.zip 壓縮檔。
 >   * https://github.com/knolleary/pubsubclient
+> * 也可透過 PubSubClient 關鍵字搜尋，可看到 PubSubClient Nick O'Leary <nick.oleary@gmail.com> v2.8 版。
 > * 使用前需先到 WiFiController.h 設定底下的參數 
 >     + `WIFI_SSID`：WIFI SSID
 >     + `WIFI_PASSWORD`：WIFI 密碼
@@ -57,11 +58,25 @@
 
 
 ---
+### Lab7_TTP223，Touch 感測器
+> * SCL → Input Pin 33
+
+
+---
+### Lab8_RSA，RSA 加解密範例
+> * 使用前需先到 RSA.h 設定底下的參數 
+>     + `RSA_P`：質數 p
+>     + `RSA_Q`：質數 q
+>     + `RSA_E`：加密指數 e，必須是與 (p−1)×(q−1) 互質的數字
+
+
+---
 ### Lab99_FinalProject，溫溼度發送到 MQTT
-> *  結合上述各項 IO，將結果透過 MQTT 通訊發送到 MQTT Server，另外除發送外，另外會從 MQTT Server 接收訂閱的結果，並顯示在 OLCD 上。
-> * TODO:
->     + RSA 加密
+> *  結合上述各項 IO，將溫溼度數據使用 RSA 加密後，透過 MQTT 通訊發送到 MQTT Server，另外除發送外也會從 MQTT Server 接收訂閱的結果，並顯示在 OLCD 上。
+> * TODO: 
 >     + WIFI 不要寫死
+>     + 多執行序處理
+
 
 
 ---

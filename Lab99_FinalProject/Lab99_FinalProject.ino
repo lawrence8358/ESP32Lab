@@ -1,66 +1,77 @@
-#include "WiFiController.h" 
+#include "WiFiController.h"
 #include "MqttController.h"
-#include "TempHumController.h" 
-#include "OlcdController.h"  
-#include "TouchController.h"  
- 
-const int GIPO_0_BTN = 0;
-bool _trunOff = false; 
+#include "TempHumController.h"
+#include "OlcdController.h"
+#include "TouchController.h"
+#include "RSA.h"
+
+const int GIPO_0_BTN = 0; 
+const String TemperatureKey = "Temperature=";
+const String HumidityKey = "Humidity=";
+
+bool _rsaEnable = true;
+bool _trunOff = false;
 bool _isTouched = false;
 bool _isSendMqtt = false;
-unsigned long _lastSendMQttTime = 0; // 上次發送 MQTT 訊息的時間
+
+unsigned long _lastSendMQttTime = 0;    // 上次發送 MQTT 訊息的時間
 unsigned long _sendMqttInterval = 3000; // 發送 MQTT 訊息的間隔時間，單位為毫秒
 
-void setup() 
+void setup()
 {
-  Serial.begin(115200);    
- 
+  Serial.begin(115200);
+
   OLCD.init();
-  OLCD.print("ESP32", "init..."); 
+  OLCD.print("ESP32", "init...");
 
-  Touch.init(); 
+  Touch.init();
 
-  TempHum.init();  
+  TempHum.init();
 
-  WIFI.connect();  
+  WIFI.connect();
 
   MQTT.init();
   MQTT.receive(mqttReciveCallback);
 }
 
-void loop() 
-{ 
-  vTaskDelay(500 / portTICK_PERIOD_MS); 
+void loop()
+{
+  vTaskDelay(1000 / portTICK_PERIOD_MS);
 
-  if (digitalRead(GIPO_0_BTN) == LOW) 
-  { 
+  if (digitalRead(GIPO_0_BTN) == LOW)
+  {
     _trunOff = true;
     MQTT.close();
-    WIFI.close(); 
-  } 
+    WIFI.close();
+  }
 
   _isTouched = Touch.isTouched();
   _isSendMqtt = isNeedSendMqtt();
  
-  if (_trunOff == false && _isSendMqtt) 
-  {   
-    WIFI.reconnect();
-
-    if(WIFI.connected()) MQTT.connect();  
-
-    MQTT.loop();   
+  // TODO: 效能問題，後續改多執行序優化
+  if(_isSendMqtt) 
+  {
+    TempHum.readData(tempHumCallback);
   }
 
-  TempHum.readData(tempHumCallback); 
+  if (_trunOff == false && _isSendMqtt)
+  {
+    WIFI.reconnect();
+
+    if (WIFI.connected())
+      MQTT.connect();
+
+    MQTT.loop();
+  } 
 }
 
-// 檢查是否需要發送 MQTT 訊息 
-bool isNeedSendMqtt() 
+// 檢查是否需要發送 MQTT 訊息
+bool isNeedSendMqtt()
 {
   unsigned long currentMillis = millis();
-  if (currentMillis - _lastSendMQttTime >= _sendMqttInterval) 
-  {   
-    _lastSendMQttTime = currentMillis;  
+  if (currentMillis - _lastSendMQttTime >= _sendMqttInterval)
+  {
+    _lastSendMQttTime = currentMillis;
     return true;
   }
 
@@ -68,39 +79,64 @@ bool isNeedSendMqtt()
 }
 
 // MQTT 訊息接收回調函數
-void mqttReciveCallback(String topic, String message) 
-{ 
+void mqttReciveCallback(String topic, String message)
+{
   displayOLCD(message, true);
 }
 
 // 溫濕度回調函數
-void tempHumCallback(float humidity, float temperature) 
-{ 
+void tempHumCallback(float humidity, float temperature)
+{
   String value;
-  String temperatureString = String(temperature, 2);
-  String humidityString = String(humidity, 2);
-  value = "Temperature: " + temperatureString + " Humidity: " + humidityString;
+
+  // 未加密的溫度和濕度
+  value = TemperatureKey + String(temperature, 2) + "\n" + HumidityKey + String(humidity, 2);
  
-  if(!WIFI.connected()) 
+  // 如果啟用 RSA 加密，則將溫度和濕度加密
+  if(_rsaEnable == true)
+  {  
+    uint64_t cipher_temp = rsa.Encrypt(uint64_t(temperature * 100));
+    uint64_t cipher_humid = rsa.Encrypt(uint64_t(humidity * 100));
+    value = TemperatureKey + String(cipher_temp) + "\n" + HumidityKey + String(cipher_humid);
+  } 
+
+  if (!WIFI.connected())
     displayOLCD(value.c_str(), false);
   else if (_isSendMqtt) 
-    MQTT.publish(value.c_str());   
+  {
+    //Serial.println("MQTT.publish : " + value);
+    MQTT.publish(value.c_str()); 
+  }
 }
 
 // 顯示訊息到 OLED
-void displayOLCD(String message, bool isOnline) 
-{   
-  if (_isTouched) 
+void displayOLCD(String message, bool isOnline)
+{
+  if (_isTouched)
   {
-    // 分割 Temperature 和 Humidity 子字串
-    String tempstr = "Temp: " + message.substring(13, 18) + " C";
-    String humidstr = "Humid: " + message.substring(29, 34) + " %";
-    String status = isOnline ? "Online" : "Offline";
+    // 取得 Temperature 和 Humidity 的值 
+    // message 的格式範例，Temperature=25.00\nHumidity=50.00  
+    int index = message.indexOf("\n");
+    String temp = message.substring(TemperatureKey.length(), index);
+    String humid = message.substring(index + HumidityKey.length() + 1);
+  
+    // 如果啟用 RSA 加密，則解密溫度和濕度
+    if(_rsaEnable == true)
+    {
+      uint64_t cipher_temp = temp.toInt();
+      uint64_t cipher_humid = humid.toInt();
+      temp = String(rsa.Decrypt(cipher_temp) / 100.0, 2);
+      humid = String(rsa.Decrypt(cipher_humid) / 100.0, 2);
+    }
 
-    OLCD.print(status, tempstr, humidstr);  
+    String tempstr = "Temp: " + temp + " C";
+    String humidstr = "Humid: " + humid + " %";  
+    String status = isOnline ? "Online" : "Offline";
+   
+    OLCD.print(status, tempstr, humidstr);
   }
-  else 
+  else
   {
-    OLCD.clear();  
-  }  
+    OLCD.clear();
+  }
 }
