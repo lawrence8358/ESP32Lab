@@ -23,8 +23,8 @@ class TouchController
     // 前一次觸碰的時間
     unsigned long _previousMillis = 0;
     
-    // 觸碰持續返回 true 的間隔時間，預設為 30 秒
-    unsigned long _interval = 30000;
+    // 觸碰持續返回 true 的間隔時間，預設為 300 秒
+    unsigned long _interval = 300000;
 };
  
 extern TouchController Touch;

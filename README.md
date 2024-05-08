@@ -70,6 +70,12 @@
 >     + `RSA_E`：加密指數 e，必須是與 (p−1)×(q−1) 互質的數字
 
 
+### Lab9_Elgamal，Elgamal 加解密範例
+> * 使用前需先到 Elgamal.h 設定底下的參數 
+>     + `Elgamal_P` : 請注意，這邊預設 99999，若加密的值超過此數字，需調整，否則求餘數後會造成錯誤。
+>     + `Elgamal_G`
+
+
 ---
 ### Lab99_FinalProject，溫溼度發送到 MQTT
 > *  結合上述各項 IO，將溫溼度數據使用 RSA 加密後，透過 MQTT 通訊發送到 MQTT Server，另外除發送外也會從 MQTT Server 接收訂閱的結果，並顯示在 OLCD 上。
