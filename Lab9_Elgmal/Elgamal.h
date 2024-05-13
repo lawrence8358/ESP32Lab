@@ -1,8 +1,8 @@
 #ifndef LawrenceLib_Elgamal_H
 #define LawrenceLib_Elgamal_H
- 
-#define Elgamal_P 99999  
-#define Elgamal_G 19
+
+#define Elgamal_P 2147483647  
+#define Elgamal_G 1983
 
 #include <stdint.h>
 #include <stdio.h>
@@ -10,25 +10,25 @@
 class Elgamal
 {
 public:
-	/** Elgamal 參數 */ 
+	/** Elgamal 參數 */
 	struct Params
 	{
-		uint64_t p;         
-		uint64_t g;  
+		uint64_t p;
+		uint64_t g;
 	};
 
 	/** 建構子 */
 	Elgamal(uint64_t p, uint64_t g);
 
 	/** 加密 */
-	uint64_t* Encrypt(uint32_t message, uint64_t Y, uint64_t x);
+	uint64_t* Encrypt(uint32_t message, uint64_t Y, uint64_t r);
 
 	/** 解密 */
-	uint64_t Decrypt(uint64_t cipher, uint64_t K);
+	uint64_t Decrypt(uint64_t cipher, uint64_t X);
 
-	uint64_t GenY(uint64_t y);
+	uint64_t GenY(uint64_t x);
 
-private: 
+private:
 	/** 計算最大公因數，歐基里德算法
 	* @param a 數字 a
 	* @param b 數字 b

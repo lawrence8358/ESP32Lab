@@ -7,7 +7,14 @@ namespace MqttReceived
     {
         #region Members
 
+        /// <summary>
+        /// 大質數
+        /// </summary>
         private BigInteger p;
+
+        /// <summary>
+        /// 公開選定的數(任意)
+        /// </summary>
         private BigInteger g;
 
         #endregion
@@ -42,9 +49,15 @@ namespace MqttReceived
             BigInteger modInverse = ModInverse(K, p);
             return (cipher * modInverse) % p;
         }
-        public BigInteger GenY(BigInteger y)
+
+        /// <summary>
+        /// 產生接收方公鑰
+        /// </summary>
+        /// <param name="x">接收方的私鑰</param>
+        /// <returns>g^x mod p</returns>
+        public BigInteger GenY(BigInteger x)
         {
-            return BigInteger.ModPow(g, y, p);
+            return BigInteger.ModPow(g, x, p);
         }
 
         #endregion

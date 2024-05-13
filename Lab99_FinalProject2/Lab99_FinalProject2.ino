@@ -2,12 +2,19 @@
 #include "MqttController.h"
 #include "TempHumController.h"
 #include "OlcdController.h" 
-#include "Elgamal.h" 
+#include "Elgamal.h"  
 
 String _sendData = "";   
 TaskHandle_t SendMessageTaskHandle;
 unsigned long _getInterval = 1000; // 要取得訊號 & 更新 UI 的間隔時間，單位為毫秒
 unsigned long _sendInterval = 3000; // 發送 MQTT 訊息的間隔時間，單位為毫秒
+
+Elgamal* elgamal = nullptr;
+
+// 接收端的 Elgamal 參數，預設值為 0，實際值要從 Server 端取得
+uint64_t Server_Elgamal_G = 0; // 公開選定的數(任意)
+uint64_t Server_Elgamal_P = 0; // 大質數
+uint64_t Server_Elgamal_Y = 0; // 公鑰 Y
 
 void setup()
 {
@@ -21,6 +28,7 @@ void setup()
   WIFI.connect();
 
   MQTT.init(); 
+  MQTT.receive(mqttReciveCallback);
 
   xTaskCreatePinnedToCore(
     SendMessageCore,      // 要執行的 Function
@@ -69,19 +77,55 @@ void GetDataAndUpdateUiCore()
   TempHum.readData(tempHumCallback); 
 } 
 
+// 處理 MQTT 回傳的公開金鑰 
+void mqttReciveCallback(String topic, String message)
+{
+  // 已完成初始化，就不需要再處理了
+  if (elgamal != nullptr)
+  {
+    return;
+  }
+
+  int gIndex = message.indexOf("g=");
+  if (gIndex == 0)
+  {
+    // if (elgamal != nullptr) delete elgamal;
+
+    int pIndex = message.indexOf("p=");
+    int YIndex = message.indexOf("Y=");
+ 
+    Server_Elgamal_G = atol(message.substring(2, pIndex - 1).c_str()); 
+    Server_Elgamal_P = atol(message.substring(pIndex + 2, YIndex - 1).c_str()); 
+    Server_Elgamal_Y = atol(message.substring(YIndex + 2).c_str());
+  
+    Serial.printf("Server 端的 Elgamal G : ");
+    Serial.println(Server_Elgamal_G);
+    Serial.printf("Server 端的 Elgamal P : ");
+    Serial.println(Server_Elgamal_P);
+    Serial.printf("Server 端的 Elgamal Y : ");
+    Serial.println(Server_Elgamal_Y);
+
+	  elgamal = new Elgamal(Server_Elgamal_P, Server_Elgamal_G);
+  }
+}
+
 // 溫濕度回調函數
 void tempHumCallback(float humidity, float temperature)
 {
   // 顯示 UI 
   displayOLCD(humidity, temperature);
 
-  // 如果啟用 Elgamal 加密，則將溫度和濕度加密
-  uint64_t Y = elgamal.GenY(23);  // TODO: 改讀取 Server 端發送
-  uint64_t x = 5;
+	if (elgamal == nullptr) 
+  {
+		Serial.println("尚未取的 Server 端的 Elgamal 參數");
+    return;
+	} 
 
-  uint64_t* cipher_humid_array = elgamal.Encrypt(int(humidity * 100) + 0.5, Y, x); 
-  uint64_t* cipher_temp_array = elgamal.Encrypt(int(temperature * 100) + 0.5, Y, x);  
-  uint64_t K = cipher_humid_array[0];  
+  uint64_t r = rand() % 100;  // 每次加密隨機產生的數 0~99，這邊的 r 要小於 P 的整數  
+  uint64_t* cipher_humid_array = elgamal->Encrypt(int(humidity * 100) + 0.5, Server_Elgamal_Y, r); 
+  uint64_t* cipher_temp_array = elgamal->Encrypt(int(temperature * 100) + 0.5, Server_Elgamal_Y, r);  
+
+  uint64_t X = cipher_humid_array[0];  
   uint64_t cipher_humid_c = cipher_humid_array[1];   
   uint64_t cipher_temp_c = cipher_temp_array[1];  
   
@@ -90,7 +134,7 @@ void tempHumCallback(float humidity, float temperature)
   free(cipher_temp_array);
 
   // 要發送的加密資料
-  _sendData = "{\"Temperature\":" + String(cipher_temp_c) + ",\"Humidity\":" + String(cipher_humid_c) + ",\"K\":" + String(K) + "}"; 
+  _sendData = "{\"Temperature\":" + String(cipher_temp_c) + ",\"Humidity\":" + String(cipher_humid_c) + ",\"X\":" + String(X) + "}"; 
 }
 
 // 顯示訊息到 OLED

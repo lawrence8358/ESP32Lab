@@ -72,8 +72,8 @@
 
 ### Lab9_Elgamal，Elgamal 加解密範例
 > * 使用前需先到 Elgamal.h 設定底下的參數 
->     + `Elgamal_P` : 請注意，這邊預設 99999，若加密的值超過此數字，需調整，否則求餘數後會造成錯誤。
->     + `Elgamal_G`
+>     + `Elgamal_P` : 質數，請注意，這邊預設 2147483647，若加密的值超過此數字，需調整，否則求餘數後會造成錯誤。
+>     + `Elgamal_G` : 公開選定的數(任意)，預設 1983
 
 
 ### Lab10_Lab10_MultiThread，多執行緒執行範例
@@ -103,9 +103,9 @@
 ---
 ### MqttReceived，負責接收和產生 Lab99_FinalProject2 的 Elgamal Key 和解密
 > * 使用 NET Core 實做接收器，必須先到 Programs.cs 設定底下的參數 
->     + `Elgamal_P` : 請注意，這邊預設 99999，若加密的值超過此數字，需調整，否則求餘數後會造成錯誤。
->     + `Elgamal_G`
->     + `Elgamal_y`
+>     + `Elgamal_P` : 質數，請注意，這邊預設 2147483647，若加密的值超過此數字，需調整，否則求餘數後會造成錯誤。
+>     + `Elgamal_G` : 公開選定的數(任意)，預設 1983
+>     + `Elgamal_x` : 接收端自選秘鑰(KEY)，預設 9527
 >     + `MQTT_Broker` : 使用 Demo MQTT，可不需調整。
 >     + `MQTT_Port` : 使用 Demo MQTT，可不需調整。
 >     + `MQTT_Topic` : 配合 Lab99_FinalProject2 內的設定一併調整。

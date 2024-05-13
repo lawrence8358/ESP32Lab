@@ -18,6 +18,6 @@ namespace MqttReceived
         /// </summary>
         public int? Humidity { get; set; }
 
-        public int? K { get; set; }
+        public int? X { get; set; }
     }
 }

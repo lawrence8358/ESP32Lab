@@ -108,10 +108,10 @@ void tempHumCallback(float humidity, float temperature)
   else if(_elgamalEnable == true)
   {  
     uint64_t Y = elgamal.GenY(23);  
-    uint64_t x = 5;
+    uint64_t r = 5;
 
-    uint64_t* cipher_humid_array = elgamal.Encrypt(int(humidity * 100) + 0.5, Y, x); 
-    uint64_t* cipher_temp_array = elgamal.Encrypt(int(temperature * 100) + 0.5, Y, x);  
+    uint64_t* cipher_humid_array = elgamal.Encrypt(int(humidity * 100) + 0.5, Y, r); 
+    uint64_t* cipher_temp_array = elgamal.Encrypt(int(temperature * 100) + 0.5, Y, r);  
     uint64_t K = cipher_humid_array[0];  
     uint64_t cipher_humid_c = cipher_humid_array[1];   
     uint64_t cipher_temp_c = cipher_temp_array[1];  
