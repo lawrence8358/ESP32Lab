@@ -102,13 +102,14 @@
 
 ---
 ### MqttReceived，負責接收和產生 Lab99_FinalProject2 的 Elgamal Key 和解密
-> * 使用 NET Core 實做接收器，必須先到 Programs.cs 設定底下的參數 
->     + `Elgamal_P` : 質數，請注意，這邊預設 2147483647，若加密的值超過此數字，需調整，否則求餘數後會造成錯誤。
->     + `Elgamal_G` : 公開選定的數(任意)，預設 1983
->     + `Elgamal_x` : 接收端自選秘鑰(KEY)，預設 9527
->     + `MQTT_Broker` : 使用 Demo MQTT，可不需調整。
->     + `MQTT_Port` : 使用 Demo MQTT，可不需調整。
->     + `MQTT_Topic` : 配合 Lab99_FinalProject2 內的設定一併調整。
+> * 使用 NET Core 實做接收器，必須先到 appsettings.json 設定底下的參數 
+>     + `Elgamal.P` : 質數，請注意，這邊預設 2147483647，若加密的值超過此數字，需調整，否則求餘數後會造成錯誤。
+>     + `Elgamal.G` : 公開選定的數(任意)，預設 1983
+>     + `Elgamal.x` : 接收端自選秘鑰(KEY)，預設 9527
+>     + `MQTT.Broker` : 使用 Demo MQTT，可不需調整。
+>     + `MQTT.Port` : 使用 Demo MQTT，可不需調整。
+>     + `MQTT.Topic` : 配合 Lab99_FinalProject2 內的設定一併調整。
+>     + `SendPublicKeyInterval ` : 公鑰發送週期(毫秒)。
 > * 作業流程 :
 >     1. 發送 Elgamal (p, q, Y) 到 MQTT Server。
 >     2. 收到 Lab99_FinalProject2 發送的訊號進行解密。

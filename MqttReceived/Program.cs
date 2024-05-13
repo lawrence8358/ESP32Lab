@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json;
+﻿using Microsoft.Extensions.Configuration;
+using Newtonsoft.Json;
 using System;
 using System.Numerics;
 using System.Text;
@@ -9,23 +10,50 @@ namespace MqttReceived
     {
         #region Members
 
-        static string MQTT_Broker = "broker.emqx.io";
-        static int MQTT_Port = 1883;
-        static string MQTT_Topic = "primeeagle/esp32";
+        static string MQTT_Broker = "";
+        static int MQTT_Port = 0;
+        static string MQTT_Topic = "";
 
-        static BigInteger Elgamal_G = 1983; // 公開選定的數(任意)
-        static BigInteger Elgamal_P = 2147483647; // 大質數
-        static BigInteger Elgama_x = 9527;  // 接收端自選秘鑰(KEY) 
+        static BigInteger Elgamal_G = 0; // 公開選定的數(任意)
+        static BigInteger Elgamal_P = 0; // 大質數
+        static BigInteger Elgama_x = 0;  // 接收端自選秘鑰(KEY) 
+        static int SendPublicKeyInterval = 0;    
 
         #endregion
 
         #region Entry Point
 
+        static void LoadConfig()
+        {
+            IConfigurationRoot configuration = new ConfigurationBuilder()
+                .SetBasePath(AppDomain.CurrentDomain.BaseDirectory)
+                .AddJsonFile("appsettings.json")
+                .Build();
+
+            MQTT_Broker = configuration["MQTT:Broker"]!;
+            MQTT_Port = int.Parse(configuration["MQTT:Port"]!);
+            MQTT_Topic = configuration["MQTT:Topic"]!;
+            Elgamal_G = BigInteger.Parse(configuration["Elgamal:G"]!);
+            Elgamal_P = BigInteger.Parse(configuration["Elgamal:P"]!);
+            Elgama_x = BigInteger.Parse(configuration["Elgamal:X"]!);
+            SendPublicKeyInterval = int.Parse(configuration["SendPublicKeyInterval"]!);
+
+            Console.WriteLine("------------初始化參數--------------");
+            Console.WriteLine($"MQTT.Broker: {MQTT_Broker}");
+            Console.WriteLine($"MQTT.Port: {MQTT_Port}");
+            Console.WriteLine($"MQTT.Topic: {MQTT_Topic}");
+            Console.WriteLine($"Elgamal.G: {Elgamal_G}");
+            Console.WriteLine($"Elgamal.P: {Elgamal_P}");
+            Console.WriteLine($"Elgamal.X: {Elgama_x}");
+            Console.WriteLine($"SendPublicKeyInterval: {SendPublicKeyInterval}");
+            Console.WriteLine("------------初始化參數完成----------\n");
+        }
+
         static async Task Main(string[] args)
         {
-            // ElgamalExample(); 
+            LoadConfig();
 
-            Console.WriteLine("******* Hello, MqttReceived *******");
+            // ElgamalExample(); 
 
             Elgamal elgamal = new Elgamal(Elgamal_P, Elgamal_G);
             BigInteger Y = elgamal.GenY(Elgama_x);
@@ -47,7 +75,7 @@ namespace MqttReceived
                 string publicKey = $"g={Elgamal_G},p={Elgamal_P},Y={Y}";
                 mqttController.Publish(publicKey);
                 Console.WriteLine($"{DateTime.Now.ToString("yyyy/MM/dd HH:mm:ss")}，發送公開金鑰 : {publicKey}");
-                await Task.Delay(3000);
+                await Task.Delay(SendPublicKeyInterval);
             }
         }
 
@@ -69,7 +97,7 @@ namespace MqttReceived
 
                 string printMessage = $"{DateTime.Now.ToString("yyyy/MM/dd HH:mm:ss")}，收到 DHT11 的訊號";
                 printMessage += $"，解密後溫度 : {decrypt_temp / 100.0}";
-                printMessage += $"，解密後濕度 : {decrypt_humid / 100.0}"; 
+                printMessage += $"，解密後濕度 : {decrypt_humid / 100.0}";
                 Console.WriteLine(printMessage);
             }
         }

@@ -24,12 +24,7 @@ namespace MqttReceived
         public Elgamal(BigInteger p, BigInteger g)
         {
             this.p = p;
-            this.g = g;
-
-            Console.WriteLine("------------金鑰生成--------------");
-            Console.WriteLine($"Elgamal: {"p",5}: {p}");
-            Console.WriteLine($"Elgamal: {"g",5}: {g}");
-            Console.WriteLine("------------金鑰生成完成----------");
+            this.g = g; 
         }
 
         #endregion
