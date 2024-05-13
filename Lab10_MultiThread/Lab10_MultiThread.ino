@@ -6,12 +6,12 @@ void setup()
 	Serial.begin(115200);  
 
   xTaskCreatePinnedToCore(
-    SendMessageThread,     // 要執行的 Function
+    SendMessageThread,  // 要執行的 Function
     "Task1",            // 自行定義的任務名稱
     10000,              // 所需堆疊空間（常用10000）
     NULL,               // 輸入值
     0,                  // 優先序：0 代表最低，數字越高越優先
-    &TaskHandle1, // 對應的任務 handle變數
+    &TaskHandle1,       // 對應的任務 handle變數
     0                   // 指定執行核心編號
   );       
 }
@@ -26,7 +26,7 @@ void GetDataThread()
 {
   Serial.print("我是負責 '取得' 感應器資料的執行緒，核心編號：");
   Serial.println(xPortGetCoreID());    
-  delay(2000); // 模擬兩秒取一次
+  delay(5000); // 模擬 5 秒取一次
 }
 
 // 負責發送訊號的執行緒

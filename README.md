@@ -76,12 +76,43 @@
 >     + `Elgamal_G`
 
 
+### Lab10_Lab10_MultiThread，多執行緒執行範例
+> * 一個執行緒負責抓取資料(每五秒抓一次)，另外一個執行緒負責發送資料(每秒發送一次)
+
+
 ---
 ### Lab99_FinalProject，溫溼度發送到 MQTT
 > *  結合上述各項 IO，將溫溼度數據使用 RSA 加密後，透過 MQTT 通訊發送到 MQTT Server，另外除發送外也會從 MQTT Server 接收訂閱的結果，並顯示在 OLCD 上。
-> * TODO: 
->     + WIFI 不要寫死
->     + 多執行序處理
+
+
+---
+### Lab99_FinalProject2，溫溼度發送到 MQTT(使用多核心處理)
+> * 參考 Lab6_MQTT 說明，先完成底下兩個檔案的參數設定
+>     + `WiFiController.h` 
+>     + `MqttController.h` 
+> *  CPU 核心 0 : 
+>     + 連接 WIFI 並控制 Wifi 連接狀態的 LED 燈。
+>     + 連接 MQTT。
+>     + (TODO) 產生 Elgamal (p, q, Y)，目前寫死，要改成讀取 MqttReceived 發送的訊號。
+>     + 發送溫濕度訊號。
+> *  CPU 核心 1 : 
+>     + 讀取溫溼度訊號，並更新發送訊號註記。
+>     + 將溫濕度訊號顯示在 OLED 上。
+
+
+---
+### MqttReceived，負責接收和產生 Lab99_FinalProject2 的 Elgamal Key 和解密
+> * 使用 NET Core 實做接收器，必須先到 Programs.cs 設定底下的參數 
+>     + `Elgamal_P` : 請注意，這邊預設 99999，若加密的值超過此數字，需調整，否則求餘數後會造成錯誤。
+>     + `Elgamal_G`
+>     + `Elgamal_y`
+>     + `MQTT_Broker` : 使用 Demo MQTT，可不需調整。
+>     + `MQTT_Port` : 使用 Demo MQTT，可不需調整。
+>     + `MQTT_Topic` : 配合 Lab99_FinalProject2 內的設定一併調整。
+> * 作業流程 :
+>     1. 發送 Elgamal (p, q, Y) 到 MQTT Server。
+>     2. 收到 Lab99_FinalProject2 發送的訊號進行解密。
+
 
 
 
