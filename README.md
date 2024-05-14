@@ -78,7 +78,7 @@
 
 
 ---
-### Lab10_Lab10_MultiThread，多執行緒執行範例
+### Lab10_MultiThread，多執行緒執行範例
 > * 一個執行緒負責抓取資料(每五秒抓一次)，另外一個執行緒負責發送資料(每秒發送一次)
 
 
@@ -89,12 +89,15 @@
 > * 使用 GPIO Pin 如下
 >     + 紅色 LED → Output Pin 16
 >     + 綠色 LED → Output Pin 17
->     + 敲擊感測器 → Input Pin 17
+>     + 敲擊感測器 → Input Pin 32
 
 
 ---
 ### Lab99_FinalProject，溫溼度發送到 MQTT
-> *  結合上述各項 IO，將溫溼度數據使用 RSA 加密後，透過 MQTT 通訊發送到 MQTT Server，另外除發送外也會從 MQTT Server 接收訂閱的結果，並顯示在 OLCD 上。
+> * 本實驗使用 DHT11、Touch、OLCD、WIFI、LED 等 IO。
+> * 將溫溼度數據使用 RSA 或 Elgamal 加密後，透過 MQTT 通訊發送到 MQTT Server。
+> * 另外除發送外也會從 MQTT Server 接收訂閱並使用 RSA 或 Elgamal 解密後，將結果顯示在 OLCD 上。
+> * 若超果指定時間，會關閉 OLCD 的畫面，必須透過觸摸 Touch Sensor 才會重新開啟。
 
 
 ---
@@ -105,8 +108,8 @@
 > *  CPU 核心 0 : 
 >     + 連接 WIFI 並控制 Wifi 連接狀態的 LED 燈。
 >     + 連接 MQTT。
->     + (TODO) 產生 Elgamal (p, q, Y)，目前寫死，要改成讀取 MqttReceived 發送的訊號。
->     + 發送溫濕度訊號。
+>     + 讀取 MqttReceived 發送的 Elgamal (p, q, Y) 公鑰訊號。
+>     + 發送 Elgamal 加密的訊號。
 > *  CPU 核心 1 : 
 >     + 讀取溫溼度訊號，並更新發送訊號註記。
 >     + 將溫濕度訊號顯示在 OLED 上。

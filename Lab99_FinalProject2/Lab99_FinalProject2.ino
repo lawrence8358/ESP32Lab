@@ -105,7 +105,7 @@ void mqttReciveCallback(String topic, String message)
     Serial.printf("Server 端的 Elgamal Y : ");
     Serial.println(Server_Elgamal_Y);
 
-	  elgamal = new Elgamal(Server_Elgamal_P, Server_Elgamal_G);
+    elgamal = new Elgamal(Server_Elgamal_P, Server_Elgamal_G);
   }
 }
 
@@ -115,11 +115,11 @@ void tempHumCallback(float humidity, float temperature)
   // 顯示 UI 
   displayOLCD(humidity, temperature);
 
-	if (elgamal == nullptr) 
+  if (elgamal == nullptr) 
   {
-		Serial.println("尚未取的 Server 端的 Elgamal 參數");
+    Serial.println("尚未取的 Server 端的 Elgamal 參數");
     return;
-	} 
+  } 
 
   uint64_t r = rand() % 100;  // 每次加密隨機產生的數 0~99，這邊的 r 要小於 P 的整數  
   uint64_t* cipher_humid_array = elgamal->Encrypt(int(humidity * 100) + 0.5, Server_Elgamal_Y, r); 
