@@ -6,7 +6,23 @@ using System.Threading.Tasks;
 
 namespace MqttReceived
 {
-    internal class ReceiveDHT11Model
+    internal class ESP32ChipInfos
+    {
+        public int ChipId { get; set; }
+
+        public string UserName { get; set; } = "";
+    }
+
+    internal class ReceiveBaseModel
+    {
+        public int Type { get; set; }
+
+        public int ChipId { get; set; }
+
+        public int? X { get; set; }
+    }
+
+    internal class ReceiveDHT11Model : ReceiveBaseModel
     {
         /// <summary>
         /// 溫度
@@ -17,7 +33,5 @@ namespace MqttReceived
         /// 濕度
         /// </summary>
         public int? Humidity { get; set; }
-
-        public int? X { get; set; }
     }
 }

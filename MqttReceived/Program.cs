@@ -1,6 +1,6 @@
 ﻿using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json;
-using System;
+using System; 
 using System.Numerics;
 using System.Text;
 
@@ -17,7 +17,12 @@ namespace MqttReceived
         static BigInteger Elgamal_G = 0; // 公開選定的數(任意)
         static BigInteger Elgamal_P = 0; // 大質數
         static BigInteger Elgama_x = 0;  // 接收端自選秘鑰(KEY) 
-        static int SendPublicKeyInterval = 0;    
+        static int SendPublicKeyInterval = 0;
+
+        static List<ESP32ChipInfos> ESP32ChipInfos = new List<ESP32ChipInfos>();
+        static string LineNotifyToken = "";
+
+        static double maxTemp = 0; // 僅超過上次最大溫度才需要通知 
 
         #endregion
 
@@ -37,6 +42,8 @@ namespace MqttReceived
             Elgamal_P = BigInteger.Parse(configuration["Elgamal:P"]!);
             Elgama_x = BigInteger.Parse(configuration["Elgamal:X"]!);
             SendPublicKeyInterval = int.Parse(configuration["SendPublicKeyInterval"]!);
+            LineNotifyToken = configuration["LineNotifyToken"]!;
+            configuration.GetSection("ESP32ChipInfos").Bind(ESP32ChipInfos);
 
             Console.WriteLine("------------初始化參數--------------");
             Console.WriteLine($"MQTT.Broker: {MQTT_Broker}");
@@ -46,13 +53,15 @@ namespace MqttReceived
             Console.WriteLine($"Elgamal.P: {Elgamal_P}");
             Console.WriteLine($"Elgamal.X: {Elgama_x}");
             Console.WriteLine($"SendPublicKeyInterval: {SendPublicKeyInterval}");
+            Console.WriteLine($"LineNotifyToken: {LineNotifyToken}");
             Console.WriteLine("------------初始化參數完成----------\n");
         }
 
         static async Task Main(string[] args)
         {
-            LoadConfig();
+            var lineNotify = new LineNotify();
 
+            LoadConfig();
             // ElgamalExample(); 
 
             Elgamal elgamal = new Elgamal(Elgamal_P, Elgamal_G);
@@ -64,7 +73,8 @@ namespace MqttReceived
                     var message = Encoding.UTF8.GetString(e.ApplicationMessage.PayloadSegment);
                     if (message.StartsWith("g=")) return Task.CompletedTask;
 
-                    ParseDHT11(elgamal, message);
+                    ParseDHT11(elgamal, message, lineNotify);
+                    ParseKY0311(elgamal, message, lineNotify);
 
                     return Task.CompletedTask;
                 });
@@ -86,19 +96,50 @@ namespace MqttReceived
         /// <summary>
         /// 解析溫溼度資料
         /// </summary>
-        private static void ParseDHT11(Elgamal elgamal, string message)
+        private static void ParseDHT11(Elgamal elgamal, string message, LineNotify lineNotify)
         {
             var dht11 = JsonConvert.DeserializeObject<ReceiveDHT11Model>(message);
-            if (dht11 != null && dht11.Temperature.HasValue && dht11.Humidity.HasValue && dht11.X.HasValue)
+            if (dht11 != null && dht11.Type == 100 &&
+                dht11.Temperature.HasValue && dht11.Humidity.HasValue && dht11.X.HasValue
+            )
             {
                 int k = dht11.X.Value;
                 var decrypt_temp = (double)elgamal.Decrypt(dht11.Temperature.Value, k);
                 var decrypt_humid = (double)elgamal.Decrypt(dht11.Humidity.Value, k);
+                var decrypt_chipId = (int)elgamal.Decrypt(dht11.ChipId, k);
 
-                string printMessage = $"{DateTime.Now.ToString("yyyy/MM/dd HH:mm:ss")}，收到 DHT11 的訊號";
+                string userName = ESP32ChipInfos.FirstOrDefault(x => x.ChipId == decrypt_chipId)?.UserName ?? decrypt_chipId.ToString();
+
+                string printMessage = $"{DateTime.Now.ToString("yyyy/MM/dd HH:mm:ss")}，收到來自【{userName}】DHT11 的訊號";
                 printMessage += $"，解密後溫度 : {decrypt_temp / 100.0}";
                 printMessage += $"，解密後濕度 : {decrypt_humid / 100.0}";
                 Console.WriteLine(printMessage);
+
+                if (maxTemp < decrypt_temp)
+                {
+                    maxTemp = decrypt_temp;
+                    lineNotify.SendAsync(LineNotifyToken, printMessage).GetAwaiter().GetResult();
+                }
+            }
+        }
+
+        /// <summary>
+        /// 解析震動資料
+        /// </summary>
+        private static void ParseKY0311(Elgamal elgamal, string message, LineNotify lineNotify)
+        {
+            var mode = JsonConvert.DeserializeObject<ReceiveBaseModel>(message);
+            if (mode != null && mode.Type == 101 && mode.X.HasValue)
+            {
+                int k = mode.X.Value;
+                var decrypt_chipId = (int)elgamal.Decrypt(mode.ChipId, k);
+
+                string userName = ESP32ChipInfos.FirstOrDefault(x => x.ChipId == decrypt_chipId)?.UserName ?? decrypt_chipId.ToString();
+
+                string printMessage = $"{DateTime.Now.ToString("yyyy/MM/dd HH:mm:ss")}，【{userName}】發生震動";
+                Console.WriteLine(printMessage);
+
+                lineNotify.SendAsync(LineNotifyToken, printMessage).GetAwaiter().GetResult();
             }
         }
 

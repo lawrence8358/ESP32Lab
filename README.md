@@ -116,6 +116,21 @@
 
 
 ---
+### Lab99_FinalProject3，震動事件偵測 MQTT(使用多核心處理)
+> * 參考 Lab6_MQTT 說明，先完成底下兩個檔案的參數設定
+>     + `WiFiController.h` 
+>     + `MqttController.h` 
+> *  CPU 核心 0 : 
+>     + 連接 WIFI 並控制 Wifi 連接狀態的 LED 燈。
+>     + 連接 MQTT。
+>     + 讀取 MqttReceived 發送的 Elgamal (p, q, Y) 公鑰訊號。
+>     + 發送 Elgamal 加密的訊號。
+> *  CPU 核心 1 : 
+>     + 讀取震動訊號，並更新發送訊號註記。
+>     + 將震動 & 網路連線 & Elgamal 公鑰交換狀態，顯示在 OLED 上。
+
+
+---
 ### MqttReceived，負責接收和產生 Lab99_FinalProject2 的 Elgamal Key 和解密
 > * 使用 NET Core 實做接收器，必須先到 appsettings.json 設定底下的參數 
 >     + `Elgamal.P` : 質數，請注意，這邊預設 2147483647，若加密的值超過此數字，需調整，否則求餘數後會造成錯誤。
@@ -124,7 +139,12 @@
 >     + `MQTT.Broker` : 使用 Demo MQTT，可不需調整。
 >     + `MQTT.Port` : 使用 Demo MQTT，可不需調整。
 >     + `MQTT.Topic` : 配合 Lab99_FinalProject2 內的設定一併調整。
->     + `SendPublicKeyInterval ` : 公鑰發送週期(毫秒)。
+>     + `SendPublicKeyInterval` : 公鑰發送週期(毫秒)。
+>     + `LineNotifyToken` : LINE Notify 通知群組 Token。
+>     + `ESP32ChipInfos` : ESP32 各晶片 ID 對應顯示名稱。
+>       + `ChipId` : 請先使用 GetChipId() 範例程式取得。
+>       + `UserName` : 顯示名稱。
+
 > * 作業流程 :
 >     1. 發送 Elgamal (p, q, Y) 到 MQTT Server。
 >     2. 收到 Lab99_FinalProject2 發送的訊號進行解密。
