@@ -27,9 +27,10 @@
 
 
 ---
-### Lab4_DHT11，讀取溫濕度感測器
-> * 使用前必須先安裝 DHT sensor library by Adafruit v1.4.6 版，可透過 DHT11 關鍵字搜尋。
+### Lab4_DHT11_DHT22，讀取溫濕度感測器
+> * 使用前必須先安裝 DHT sensor library for ESPx v1.19 版。
 > * 使用前需先到 TempHumController.h 設定底下的參數  
+>     + `DHT_TYPE`：根據你的溫濕度感測器的類型調整此參數，預設使用 DHT11
 >     + `DHT_GPIO`：溫溼度的輸入腳位
 
 

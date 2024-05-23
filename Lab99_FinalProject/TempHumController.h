@@ -3,8 +3,12 @@
 
 #define DHT_GPIO 32 
 
+// 根據你的溫濕度感測器的類型調整此參數，預設使用 DHT11
+#define DHT_TYPE DHT11 
+// #define DHT_TYPE DHT22 
+
 #include <Arduino.h> 
-#include "DHT.h"
+#include "DHTesp.h"
     
 /** 溫濕度感測器 callback 函式 */
 typedef void (*DhtCallback)(float humidity, float temperature);
@@ -26,7 +30,7 @@ class TempHumController
 
   private:
     /** 溫濕度感測器 */
-    DHT dht;
+    DHTesp dht;
 };
  
 extern TempHumController TempHum;

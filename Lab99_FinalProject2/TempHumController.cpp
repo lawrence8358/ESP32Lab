@@ -1,27 +1,32 @@
 #include "TempHumController.h" 
 
-TempHumController::TempHumController(int pin) : dht(pin, DHT11) 
-{ 
+TempHumController::TempHumController(int pin)
+{
+  dht.setup(pin, DHTesp::DHT_TYPE);
 }
 
 void TempHumController::init() 
-{
-  dht.begin();
+{ 
 }
 
 void TempHumController::readData(DhtCallback callback) 
 {
-  float humidity = dht.readHumidity();
-  float temperature = dht.readTemperature();
+  TempAndHumidity data = dht.getTempAndHumidity();
+
+  if (dht.getStatus() != 0) 
+  {
+    Serial.println("DHT sensor error status: " + String(dht.getStatusString()));
+    return;
+  } 
 
   // Not a Number 
-  if(isnan(humidity) || isnan(temperature))
-  { 
+  if (isnan(data.humidity) || isnan(data.temperature)) 
+  {
     Serial.println("Failed to read from DHT sensor!");
     return;
-  }
+  } 
 
-  callback(humidity, temperature);
+  callback(data.humidity, data.temperature); 
 }
 
 TempHumController TempHum(DHT_GPIO);
