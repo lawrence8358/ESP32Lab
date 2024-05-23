@@ -93,6 +93,15 @@
 
 
 ---
+### Lab11_SW520D，角度改測器
+> * 直立時高電位顯示綠燈、水平時低電未紅燈。
+> * 使用 GPIO Pin 如下
+>     + 紅色 LED → Output Pin 16
+>     + 綠色 LED → Output Pin 17
+>     + 角度感測器 → Input Pin 32
+
+
+---
 ### Lab99_FinalProject，溫溼度發送到 MQTT
 > * 本實驗使用 DHT11、Touch、OLCD、WIFI、LED 等 IO。
 > * 將溫溼度數據使用 RSA 或 Elgamal 加密後，透過 MQTT 通訊發送到 MQTT Server。

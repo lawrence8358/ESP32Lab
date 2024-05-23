@@ -8,6 +8,10 @@ TaskHandle_t SendMessageTaskHandle;
 unsigned long _getInterval = 500; // 已符合發送條件要等待的間隔時間，單位為毫秒
 unsigned long _sendInterval = 3000; // 發送 MQTT 訊息的間隔時間，單位為毫秒
 
+// 使用 SW520D 角度感測器時，預設值請改為 HIGH
+// 使用 SW-420 震動感測器時，預設值請改為 LOW
+const int SENSOR_DEFAULT = HIGH; 
+
 Elgamal* elgamal = nullptr;
 
 // 接收端的 Elgamal 參數，預設值為 0，實際值要從 Server 端取得
@@ -19,7 +23,7 @@ int GPIO_SHOCK = 32;
 int alarmCount = 1; // 震動達幾次才發送訊號
 int preShockValue = 0;
 int shockCount = 0;
-
+ 
 void setup()
 {
   Serial.begin(115200);
@@ -88,9 +92,9 @@ void GetDataAndUpdateUiCore()
   } 
 
   int shockValue = digitalRead(GPIO_SHOCK);
-
+  
   // 連續震動判斷，必須是不同震動才累加次數，若前一次都是也是低電位，視為相同震動
-  if(shockValue == LOW && shockValue != preShockValue)  
+  if(shockValue == SENSOR_DEFAULT && shockValue != preShockValue)  
     shockCount += 1; 
 
   preShockValue = shockValue;  
