@@ -1,6 +1,6 @@
 ﻿using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json;
-using System; 
+using System;
 using System.Numerics;
 using System.Text;
 
@@ -60,7 +60,7 @@ namespace MqttReceived
         static async Task Main(string[] args)
         {
             var lineNotify = new LineNotify();
-
+              
             LoadConfig();
             // ElgamalExample(); 
 
@@ -136,7 +136,7 @@ namespace MqttReceived
 
                 string userName = ESP32ChipInfos.FirstOrDefault(x => x.ChipId == decrypt_chipId)?.UserName ?? decrypt_chipId.ToString();
 
-                string printMessage = $"{DateTime.Now.ToString("yyyy/MM/dd HH:mm:ss")}，【{userName}】發生震動";
+                string printMessage = $"{DateTime.Now.ToString("yyyy/MM/dd HH:mm:ss")}，【{userName}】發生跌倒事件！";
                 Console.WriteLine(printMessage);
 
                 lineNotify.SendAsync(LineNotifyToken, printMessage).GetAwaiter().GetResult();

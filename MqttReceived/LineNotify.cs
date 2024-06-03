@@ -26,15 +26,24 @@ namespace MqttReceived
         public async Task SendAsync(string token, string message)
         {
             HttpResponseMessage? response = null;
+            var lineNotifyUrl = "https://notify-api.line.me/api/notify";
             using var httpRequest = new HttpRequestMessage(HttpMethod.Post, string.Empty)
             {
                 Headers = { Authorization = new AuthenticationHeaderValue("Bearer", token) }
             };
-            httpRequest.RequestUri = new Uri("https://notify-api.line.me/api/notify");
-            httpRequest.Content = new FormUrlEncodedContent(new Dictionary<string, string>
-            {
-                {"message", message}
-            });
+            httpRequest.RequestUri = new Uri(lineNotifyUrl);
+
+            using var formDataContent = new MultipartFormDataContent();
+            var imagePath = Path.Combine(Directory.GetCurrentDirectory(), "image.png");
+            var fileBytes = File.ReadAllBytes(imagePath);
+            var imageContent = new ByteArrayContent(fileBytes);
+            formDataContent.Add(imageContent, "imageFile", "image.png");
+            httpRequest.RequestUri = new Uri(lineNotifyUrl + $"?message={Uri.EscapeDataString(message)}");
+            httpRequest.Content = formDataContent;
+            //httpRequest.Content = new FormUrlEncodedContent(new Dictionary<string, string>
+            //{
+            //    {"message", message}
+            //});
 
             response = await _httpClient.SendAsync(httpRequest);
 
