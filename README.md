@@ -27,6 +27,15 @@
 
 
 ---
+### Lab3_WiFiSwitch，Wifi AP 與 STA 模式切換
+> * 使用前必須先安裝 ESPAsyncWebServer by lacamera 3.1.0 版，請注意這個套件版本叫舊，因此僅能使用 ESP3 BOARD 2.O.X 版。
+> * 搭配 Lab5_OLCD，OLCD 需使用 I2C 通訊，5V 電壓
+>     + SCL → GPIO 22 (右上 3)
+>     + SDA → GPIO 21 (右上 6)
+> * 參考 [黑大提供的 Wifi 設定介面](https://blog.darkthread.net/blog/esp-wifi-conf-demo/)，提供 AP 模式與 STA(Station) 的切換模式調整的。
+
+
+---
 ### Lab4_DHT11_DHT22，讀取溫濕度感測器
 > * 使用前必須先安裝 DHT sensor library for ESPx v1.19 版。
 > * 使用前需先到 TempHumController.h 設定底下的參數  
@@ -36,7 +45,8 @@
 
 ---
 ### Lab5_OLCD，OLCD 控制
-> * ESP32-S，OLCD 需使用 I2C 通訊，5V 電壓
+> * 使用前必須先安裝 Adafruit SSD1306 v2.5.16 版。
+> * ESP32，OLCD 需使用 I2C 通訊，5V 電壓
 >     + SCL → GPIO 22 (右上 3)
 >     + SDA → GPIO 21 (右上 6)
 
