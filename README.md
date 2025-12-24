@@ -122,6 +122,38 @@
 
 
 ---
+### Lab50_GeomagneticMonitor，地磁監測器（WiFi + BMM150 + MQTT 多執行緒整合）
+> * 本實驗結合 Lab3_WifiSwitch 與 Lab12_BMM150，並使用多執行緒架構。
+> * **主要功能：**
+>     + WiFi AP/STA 模式自動切換，狀態顯示於 OLED 第一區塊
+>     + BMM150 地磁數據持續讀取並顯示於 OLED 第二區塊
+>     + 網路連線成功後，透過 MQTT 發送地磁數據（JSON 格式，不加密）
+> * **多執行緒架構（FreeRTOS）：**
+>     + Core 0：WiFi 連線管理、MQTT 連線與發送
+>     + Core 1：BMM150 數據讀取、OLED 顯示更新
+> * **使用前準備：**
+>     + 安裝 ESPAsyncWebServer by lacamera 3.1.0 版（注意：僅支援 ESP32 BOARD 2.0.X 版）
+>     + 安裝 Adafruit SSD1306 v2.5.16 版
+>     + 安裝 PubSubClient v2.8 版
+>     + 安裝 DFRobot_BMM150 Library
+> * **硬體接線：**
+>     + OLED：SCL → GPIO 22、SDA → GPIO 21（I2C 通訊，5V 電壓）
+>     + BMM150：SCL → GPIO 22、SDA → GPIO 21（I2C 通訊，3.3V-5V 電壓）
+> * **可調整參數（於 .ino 檔案中）：**
+>     + `BMM150_READ_INTERVAL_MS`：BMM150 讀取間隔（預設 1000ms）
+>     + `MQTT_SEND_INTERVAL_MS`：MQTT 發送間隔（預設 5000ms）
+> * **可調整參數（於 MqttController.h 中）：**
+>     + `MQTT_SERVER`：MQTT Server Host
+>     + `MQTT_PORT`：MQTT Server Port
+>     + `MQTT_ID`：MQTT 連線 ID
+>     + `MQTT_DEFAULT_TOPIC`：MQTT 預設主題
+> * **MQTT 發送格式（JSON）：**
+>     ```json
+>     {"x":12.34,"y":56.78,"z":90.12,"degree":123.45}
+>     ```
+
+
+---
 ### Lab99_FinalProject，溫溼度發送到 MQTT
 > * 本實驗使用 DHT11、Touch、OLCD、WIFI、LED 等 IO。
 > * 將溫溼度數據使用 RSA 或 Elgamal 加密後，透過 MQTT 通訊發送到 MQTT Server。
