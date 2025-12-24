@@ -28,7 +28,7 @@
 
 ---
 ### Lab3_WiFiSwitch，Wifi AP 與 STA 模式切換
-> * 使用前必須先安裝 ESPAsyncWebServer by lacamera 3.1.0 版，請注意這個套件版本叫舊，因此僅能使用 ESP3 BOARD 2.O.X 版。
+> * 使用前必須先安裝 ESPAsyncWebServer by lacamera 3.1.0 版，請注意這個套件版本較舊，因此僅能使用 ESP3 BOARD 2.0.X 版。
 > * 搭配 Lab5_OLCD，OLCD 需使用 I2C 通訊，5V 電壓
 >     + SCL → GPIO 22 (右上 3)
 >     + SDA → GPIO 21 (右上 6)
@@ -110,6 +110,15 @@
 >     + 紅色 LED → Output Pin 16
 >     + 綠色 LED → Output Pin 17
 >     + 角度感測器 → Input Pin 32
+
+
+---
+### Lab12_BMM150，三軸數位地磁感測器
+> * 使用前必須先安裝 Adafruit SSD1306 v2.5.16 版，[Github](https://github.com/DFRobot/DFRobot_BMM150)。
+> * 使用方式可參考　[範例網站](http://wiki.dfrobot.com.cn/_SKU_SEN0529_Gravity_BMM150_%E4%B8%89%E8%BD%B4%E5%9C%B0%E7%A3%81%E4%BC%A0%E6%84%9F%E5%99%A8)。
+> * BMM150 需使用 I2C 通訊，3.3V-5V 電壓
+>     + SCL → GPIO 22 (右上 3)
+>     + SDA → GPIO 21 (右上 6)
 
 
 ---
