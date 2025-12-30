@@ -114,13 +114,16 @@
 
 ---
 ### Lab12_BMM150，三軸數位地磁感測器
-> * 使用前必須先安裝 Adafruit SSD1306 v2.5.16 版，[Github](https://github.com/DFRobot/DFRobot_BMM150)。
-> * 使用方式可參考　[範例網站](http://wiki.dfrobot.com.cn/_SKU_SEN0529_Gravity_BMM150_%E4%B8%89%E8%BD%B4%E5%9C%B0%E7%A3%81%E4%BC%A0%E6%84%9F%E5%99%A8)。
+> * 使用前必須先安裝 DFRobot_BMM1506 v1.0.0 版，[Github](https://github.com/DFRobot/DFRobot_BMM150)。
+> * 使用方式可參考 [範例網站](http://wiki.dfrobot.com.cn/_SKU_SEN0529_Gravity_BMM150_%E4%B8%89%E8%BD%B4%E5%9C%B0%E7%A3%81%E4%BC%A0%E6%84%9F%E5%99%A8)。
 > * BMM150 需使用 I2C 通訊，3.3V-5V 電壓
 >     + SCL → GPIO 22 (右上 3)
 >     + SDA → GPIO 21 (右上 6)
+> * **Lab12_BMM150_PlatformIO** 為 PlatformIO 版本專案
+>
+> ![三軸數位地磁感測器](Lab12_BMM150_PlatformIO/demo.png)
 
-
+ 
 ---
 ### Lab50_GeomagneticMonitor，地磁監測器（WiFi + BMM150 + MQTT 多執行緒整合）
 > * 本實驗結合 Lab3_WifiSwitch 與 Lab12_BMM150，並使用多執行緒架構。
@@ -151,6 +154,22 @@
 >     ```json
 >     {"x":12.34,"y":56.78,"z":90.12,"degree":123.45}
 >     ```
+
+### Lab50_GeomagneticMonitor_PlatformIO，地磁監測器（PlatformIO 版本）
+> * 此為 Lab50_GeomagneticMonitor 的 PlatformIO 移植版本，功能完全相同。
+> * **專案依賴套件（platformio.ini）**：
+>     + `DFRobot_BMM150`：三軸地磁感測器驅動（使用 GitHub URL）
+>     + `Adafruit SSD1306 @ ^2.5.16`：OLED 顯示驅動
+>     + `PubSubClient @ ^2.8`：MQTT 通訊
+>     + `ESPAsyncWebServer`：WiFi 設定網頁伺服器（使用 GitHub URL）
+>     + `AsyncTCP`：ESPAsyncWebServer 依賴（使用 GitHub URL）
+> * **硬體接線（與 Arduino IDE 版本相同）**：
+>     + OLED：SCL → GPIO 22、SDA → GPIO 21（I2C，5V）
+>     + BMM150：SCL → GPIO 22、SDA → GPIO 21（I2C，3.3V-5V）
+> * **可調整參數（於 MqttController.h 中）**：
+>     + `MQTT_SERVER`、`MQTT_PORT`、`MQTT_ID`、`MQTT_DEFAULT_TOPIC`
+> 
+> ![地磁監測器](Lab50_GeomagneticMonitor_PlatformIO/demo.png)
 
 
 ---
@@ -211,6 +230,40 @@
 >     2. 收到 Lab99_FinalProject2 發送的訊號進行解密。
 
 
+## PlatformIO 建置與上傳（通用）
+* 以下為常用 PlatformIO 指令，適用於任一 PlatformIO 專案： 
+    ```bash
+    # 建置 (build)
+    platformio run 
+
+    # 上傳 (upload)
+    platformio run --target upload
+    
+    # 監看序列埠 (monitor)
+    platformio device monitor --baud 115200
+    ```
+* 注意事項：
+    + 若需指定上傳埠，請加上 `-p COMx`（例如 `platformio run --target upload -p COM3`）。
+    + 若 library 下載失敗，可把第三方庫 clone 到本地並放到專案 `lib/` 目錄，或在 `platformio.ini` 使用 `lib_extra_dirs` 指向本機路徑。
+* `platformio.ini` 常用欄位說明：
+    + `platform`：指定平台（例如 `espressif32`）。
+    + `board`：選擇開發板型號（例如 `esp32dev`），會影響編譯與燒錄設定。
+    + `framework`：使用的開發框架（例如 `arduino` 或 `espidf`）。
+    + `lib_deps`：第三方函式庫依賴，可使用 GitHub URL 或套件名稱（例如 `lib_deps = https://github.com/DFRobot/DFRobot_BMM150`）。
+    + `upload_speed`：上傳（燒錄）速度（例如 `921600`）。
+    + `monitor_speed`：序列監視器鮑率（例如 `115200`）。
+    + `upload_port`：可選，強制指定上傳埠（例如 `COM3`）。
+    + `lib_extra_dirs`：指定本機額外的 library 目錄，方便加入無法從網路下載的庫。
+* 範例 `platformio.ini`（精簡）：
+    ```ini
+    [env:esp32dev]
+    platform = espressif32
+    board = esp32dev
+    framework = arduino
+    lib_deps = https://github.com/DFRobot/DFRobot_BMM150
+    upload_speed = 921600
+    monitor_speed = 115200
+    ```
 
 
 ---
